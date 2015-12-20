@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Alarm Manager Tutorial</string>
+    <string name="action_settings">Settings</string>
+</resources>
