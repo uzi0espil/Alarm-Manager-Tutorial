@@ -2,6 +2,8 @@ package com.alarmmanager.tutorial.alarmmanagertutorial;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -11,12 +13,18 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.alarmmanager.tutorial.alarmmanagertutorial.BroadcastReceivers.AlarmReceiver;
+import com.alarmmanager.tutorial.alarmmanagertutorial.Helpers.Functions;
 
+import java.util.Calendar;
 import java.util.GregorianCalendar;
 
 public class MainActivity extends AppCompatActivity {
+
+    private TextView tv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,14 +33,30 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        tv = (TextView) findViewById(R.id.textView);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Timer has been triggered, please wait for notfication", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                setAlarm(5);
+            public void onClick(final View view) {
+
+
+                Calendar mCurrentTime = Calendar.getInstance();
+                int hour = mCurrentTime.get(Calendar.HOUR_OF_DAY);
+                int minute = mCurrentTime.get(Calendar.MINUTE);
+
+                TimePickerDialog dialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timerView, int hourOfDay, int minute) {
+                        Functions.setAlarm(getApplicationContext(), hourOfDay, minute);
+                        Snackbar.make(view, "Timer has been set on " + hourOfDay + ":" + minute, Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+
+                    }
+                }, hour, minute, true);
+
+                dialog.setTitle("Set Alarm");
+                dialog.show();
             }
         });
     }
@@ -57,15 +81,5 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void setAlarm(int timer){
-        long alertTime = new GregorianCalendar().getTimeInMillis() + timer * 1000;
-
-        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-
-        Intent AlarmIntent = new Intent(this, AlarmReceiver.class);
-
-        alarmManager.set(AlarmManager.RTC_WAKEUP, alertTime, PendingIntent.getBroadcast(getApplicationContext(), 0,  AlarmIntent, PendingIntent.FLAG_UPDATE_CURRENT));
     }
 }
